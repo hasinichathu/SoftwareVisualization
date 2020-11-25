@@ -8,6 +8,7 @@ package hello3D.test;
 import com.jme3.app.SimpleApplication;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
+import com.jme3.texture.Image;
 import com.jme3.util.JmeFormatter;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
@@ -23,14 +24,18 @@ import java.util.concurrent.Callable;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
+import javax.swing.ListSelectionModel;
 import static javax.swing.SwingConstants.PREVIOUS;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -46,10 +51,11 @@ public class LayoutGenerator {
     private static JFrame frame;
     private static Container viewer, hierarchy;
     private static Container currentPanel;
+    private static JToolBar toolBar;
     private Island island;
-    
-    public LayoutGenerator(Island island){
-        this.island=island;
+
+    public LayoutGenerator(Island island) {
+        this.island = island;
     }
 
     void swingHandler() {
@@ -97,8 +103,7 @@ public class LayoutGenerator {
         context = (JmeCanvasContext) appClass.getContext();
         canvas = context.getCanvas();
         canvas.setSize(settings.getWidth(), settings.getHeight());
-        
-        
+
     }
 
     private static void createFrame(Island app) {
@@ -111,31 +116,44 @@ public class LayoutGenerator {
             }
         });
 
+        createToolBar();
         createPanes();
         createMenu(app);
-        
+
+    }
+
+    private static void createToolBar() {
+        toolBar = new JToolBar("Still draggable");
+
+        frame.add(toolBar, BorderLayout.NORTH);
+        addButtons();
     }
 
     private static void createPanes() {
-        JToolBar toolBar = new JToolBar("Still draggable");
-        JButton newGameBtn = new JButton("Reload");
-        JButton regretBtn = new JButton("Close");
-        toolBar.add(newGameBtn);
-        toolBar.add(regretBtn);
-        
+
         viewer = new JPanel();
         viewer.setLayout(new BorderLayout());
 
         hierarchy = new JPanel();
         hierarchy.setLayout(new BorderLayout());
-        hierarchy.add(toolBar);
-        
-        
+        createHierarchy();
 
         frame.getContentPane().add(viewer);
         frame.getContentPane().add(hierarchy, BorderLayout.WEST);
-        //frame.getContentPane().add(toolBar);
+
         currentPanel = viewer;
+    }
+
+    private static void createHierarchy() {
+        Integer[] data = {10,20,30,4000};
+        JList list = new JList(data); //data has type Object[]
+        list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        list.setLayoutOrientation(JList.VERTICAL);
+        list.setVisibleRowCount(-1);
+        
+        JScrollPane listScroller = new JScrollPane(list);
+        listScroller.setPreferredSize(new Dimension(250, 80));
+        hierarchy.add(list);
     }
 
     private static void createMenu(Island app) {
@@ -247,9 +265,7 @@ public class LayoutGenerator {
                 frame.dispose();
                 app.stop();
             }
-        });
-        
-        createTaskBar(app);
+        });   
     }
 
     public static void startApp(Island app) {
@@ -268,52 +284,51 @@ public class LayoutGenerator {
 
     }
 
-    private static void createTaskBar(Island app) {
-        //super(new BorderLayout());
+    private static void addButtons() {
+        JButton button1 = null;
+        JButton button2 = null;
+        JButton button3 = null;
 
-        JToolBar toolBar = new JToolBar("Still draggable");
-        addButtons(toolBar);
-
-        //toolBar.setPreferredSize(new Dimension(450, 130));
-        //toolBar.add(toolBar, BorderLayout.PAGE_START);
-        //toolBar.add(scrollPane, BorderLayout.CENTER);
-    }
-
-    private static void addButtons(JToolBar toolBar) {
-        JButton button = null;
-        JButton button1 = new JButton();
-        //first button
-        button = makeNavigationButton("Back24", PREVIOUS,
+        //first button2
+        button1 = makeNavigationButton("reload",
                 "Back to previous something-or-other",
                 "Previous");
         toolBar.add(button1);
 
-        //second button
-        button = makeNavigationButton("Up24", UP,
+        //second button2
+        button2 = makeNavigationButton("secrity2", 
                 "Up to something-or-other",
                 "Up");
-        toolBar.add(button);
+        toolBar.add(button2);
         
+        button3 = makeNavigationButton("reuse", 
+                "Up to something-or-other",
+                "Up");
+        toolBar.add(button3);
+
     }
 
     private static JButton makeNavigationButton(String imageName,
-            int actionCommand,
             String toolTipText,
             String altText) {
         //Look for the image.
-        String imgLocation = "images/"
+        String imgLocation = "F:/Uni/4th_year/project/icons/"
                 + imageName
-                + ".gif";
-        //URL imageURL = ToolBarDemo.class.getResource(imgLocation);
-        URL imageURL = null;
-        //Create and initialize the button.
+                + ".png";
+        //URL imageURL = LayoutGenerator.class.getResource(imgLocation);
+        //URL imageURL = null;
+        //Create and initialize the button2.
         JButton button = new JButton();
+        button.setPreferredSize(new Dimension(40, 40));
         //button.setActionCommand(actionCommand);
         button.setToolTipText(toolTipText);
         //button.addActionListener(this);
 
-        if (imageURL != null) {                      //image found
-            //button.setIcon(new ImageIcon(imageURL, altText));
+        if (imgLocation != null) {                      //image found
+            ImageIcon imageIcon= new ImageIcon(imgLocation, altText);
+            java.awt.Image newimg = imageIcon.getImage().getScaledInstance(35, 35, java.awt.Image.SCALE_SMOOTH);
+            imageIcon = new ImageIcon(newimg);  
+            button.setIcon(imageIcon);
         } else {                                     //no image found
             button.setText(altText);
             System.err.println("Resource not found: " + imgLocation);
